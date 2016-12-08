@@ -1,0 +1,426 @@
+{
+  "port": 8000,
+  "log_level": "info",
+  "storage": "rethinkdb",
+  "rethinkdb": {
+    "host": "localhost",
+    "db": "eigengraph"
+  },
+  "cassandra": {
+    "contactPoints": [
+      "localhost"
+    ],
+    "keyspace": "eigengraph"
+  },
+  "graph": {
+    "custom_schemas": {
+      "key_value": {
+        "key": {
+          "type": "string",
+          "required": true
+        },
+        "value": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "human_name": {
+        "use": {
+          "type": "string",
+          "enum": [
+            "usual",
+            "official",
+            "temp",
+            "nickname",
+            "anonymous",
+            "old",
+            "maiden"
+          ],
+          "default": "official"
+        },
+        "family": {
+          "type": "string",
+          "min": 1,
+          "max": 512,
+          "required": true
+        },
+        "given": {
+          "type": "string",
+          "min": 1,
+          "max": 512,
+          "required": true
+        },
+        "prefix": {
+          "type": "string",
+          "min": 1,
+          "max": 64
+        },
+        "suffix": {
+          "type": "string",
+          "min": 1,
+          "max": 64
+        },
+        "middle": {
+          "type": "string",
+          "min": 1,
+          "max": 64
+        }
+      },
+      "edge": {
+        "src": {
+          "type": "string",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "dst": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "dimension": {
+        "height": {
+          "type": "integer",
+          "required": true
+        },
+        "width": {
+          "type": "integer",
+          "required": true
+        }
+      },
+      "resize": {
+        "url": {
+          "type": "string",
+          "required": false
+        },
+        "dimensions": {
+          "type": "struct",
+          "schema": "dimension",
+          "required": true
+        }
+      },
+      "time": {
+        "hour": {
+          "type": "integer"
+        },
+        "minute": {
+          "type": "integer"
+        },
+        "second": {
+          "type": "integer"
+        }
+      },
+      "date": {
+        "year": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        },
+        "day_of_week": {
+          "type": "integer"
+        }
+      }
+    },
+    "common_fields": {
+      "id": {
+        "type": "string",
+        "required": true
+      },
+      "object_type": {
+        "type": "string",
+        "required": true,
+        "edit_mode": "NE"
+      },
+      "created_at": {
+        "type": "date",
+        "required": true
+      },
+      "modified_at": {
+        "type": "date",
+        "required": true
+      },
+      "deleted_at": {
+        "type": "date"
+      }
+    },
+    "system_user": {
+      "code": "01",
+      "suppress_event": true,
+      "back_end_only": true,
+      "fields": {
+        "salt": {
+          "type": "string"
+        },
+        "password_hash": {
+          "type": "string"
+        },
+        "reset_token": {
+          "type": "string"
+        },
+        "verify_token": {
+          "type": "string"
+        }
+      }
+    },
+    "session": {
+      "code": "02",
+      "suppress_event": true,
+      "back_end_only": true,
+      "fields": {
+        "user": {
+          "type": "string",
+          "required": true
+        },
+        "token": {
+          "type": "string",
+          "required": false
+        },
+        "expires_at": {
+          "type": "date",
+          "required": true
+        }
+      }
+    },
+    "user": {
+      "code": "03",
+      "GET": "self",
+      "PUT": "self",
+      "fields": {
+        "name": {
+          "type": "struct",
+          "schema": "human_name",
+          "required": true,
+          "edit_mode": "E"
+        },
+        "email": {
+          "type": "string",
+          "validator": "email",
+          "required": true
+        },
+        "system": {
+          "type": "object_id",
+          "object_types": ["system_user"],
+          "required": true
+        },
+        "verified": {
+          "type": "boolean",
+          "default": false
+        },
+        "no_password": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "edges": {
+        "roles": {
+          "contains": [],
+          "GET": "self"
+        }
+      }
+    },
+    "event": {
+      "code": "04",
+      "back_end_only": true,
+      "fields": {
+        "object": {
+          "type": "string"
+        },
+        "edge": {
+          "type": "struct",
+          "schema": "edge"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "DELETE"
+          ],
+          "required": true
+        },
+        "current": {
+          "type": "struct",
+          "schema": "any"
+        },
+        "previous": {
+          "type": "struct",
+          "schema": "any"
+        },
+        "created_at": {
+          "type": "integer",
+          "required": true
+        }
+      }
+    },
+    "job": {
+      "code": "05",
+      "back_end_only": true,
+      "fields": {
+        "user": {
+          "type": "object_id",
+          "object_types": ["user"],
+          "required": true
+        },
+        "job_code": {
+          "type": "string",
+          "required": true
+        },
+        "input": {
+          "type": "array:struct",
+          "schema": "key_value"
+        },
+        "output": {
+          "type": "array:struct",
+          "schema": "key_value"
+        },
+        "completed": {
+          "type": "boolean",
+          "default": false
+        },
+        "read": {
+          "type": "boolean",
+          "default": false
+        },
+        "delete_at": {
+          "type": "date"
+        }
+      }
+    },
+    "file": {
+      "code": "06",
+      "GET": "any",
+      "PUT": "self",
+      "fields": {
+        "mime_type": {
+          "type": "string",
+          "required": true,
+          "edit_mode": "E"
+        },
+        "user": {
+          "type": "object_id",
+          "object_types": ["user"],
+          "required": true,
+          "auto_value": "req.user"
+        },
+        "upload_url": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "required": true
+        },
+        "title": {
+          "type": "string",
+          "min": 1,
+          "max": 256,
+          "edit_mode": "E"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "dimensions": {
+          "type": "struct",
+          "schema": "dimension"
+        },
+        "resizes": {
+          "type": "array:struct",
+          "schema": "resize"
+        },
+        "hosted": {
+          "type": "boolean",
+          "default": false
+        },
+        "uploaded": {
+          "type": "boolean",
+          "default": false,
+          "edit_mode": "NC"
+        },
+        "standalone": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "schedule": {
+      "code": "07",
+      "back_end_only": true,
+      "fields": {
+        "listener": {
+          "type": "string",
+          "required": true,
+          "edit_mode": "NE"
+        },
+        "schedule_code": {
+          "type": "string",
+          "required": true
+        },
+        "time": {
+          "type": "struct",
+          "schema": "time",
+          "required": true,
+          "edit_mode": "NE"
+        },
+        "date": {
+          "type": "struct",
+          "schema": "date",
+          "edit_mode": "NE"
+        },
+        "repeat": {
+          "type": "string",
+          "enum": [
+            "daily",
+            "weekly",
+            "monthly",
+            "yearly"
+          ],
+          "edit_mode": "NE"
+        }
+      }
+    },
+    "schedule_event": {
+      "code": "08",
+      "back_end_only": true,
+      "fields": {
+        "schedule": {
+          "type": "object_id",
+          "object_types": ["schedule"],
+          "required": true
+        },
+        "schedule_code": {
+          "type": "string",
+          "required": true
+        },
+        "listener": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "secret_organization": {
+      "code": "09",
+      "suppress_event": true,
+      "back_end_only": true,
+      "fields": {
+        "secret_keys": {
+          "type": "array:struct",
+          "schema": "key_value",
+          "required": true
+        }
+      }
+    },
+    "objects": {
+      "secret_organization": ""
+    },
+    "pagination": {
+      "default_count": 25,
+      "max_count": 50,
+      "pagination_mode": "index"
+    }
+  }
+}

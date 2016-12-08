@@ -1,0 +1,12 @@
+{
+  "env": {
+    "mocha": true
+  },
+  "extends": "eslint-config-xo",
+  "rules": {
+    "quotes": ["error", "double"],
+    "indent": ["error", 4],
+    "space-before-function-paren": ["error", "never"],
+    "generator-star-spacing": ["error", "before"]
+  }
+}

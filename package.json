@@ -1,0 +1,29 @@
+{
+  "name": "client-data",
+  "version": "0.0.1",
+  "main": "index.js",
+  "dependencies": {
+    "bunyan": "^1.8.4",
+    "cassandra-driver": "^3.1.5",
+    "co": "^4.6.0",
+    "microtime": "^2.1.1",
+    "node-uuid": "^1.4.7",
+    "request": "^2.78.0",
+    "restify": "^4.1.1",
+    "rethinkdbdash": "^2.3.23",
+    "underscore": "^1.8.3",
+    "yargs": "^6.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.8.1",
+    "eslint-config-xo": "^0.17.0",
+    "mocha": "^3.1.2",
+    "supertest": "^2.0.1"
+  },
+  "scripts": {
+    "start": "node index.js -c config.json",
+    "lint": "eslint .",
+    "test": "mocha test/*.js -c config.json"
+  },
+  "license": "MIT"
+}
