@@ -215,6 +215,10 @@
         "no_password": {
           "type": "boolean",
           "default": false
+        },
+        "date_of_birth": {
+          "type": "date",
+          "required": true
         }
       },
       "edges": {
