@@ -20,7 +20,8 @@ function init() {
             r.tableCreate("events", options).then(() =>
                 r.table("events").indexCreate("created_at")
             ),
-            r.tableCreate("event_offset", options)
+            r.tableCreate("event_offset", options),
+            r.tableCreate("unique", options)
         ])
     );
 }
@@ -145,6 +146,17 @@ function saveEvent(event) {
     return r.table("events").insert(event).run();
 }
 
+/**
+ * Add unique record
+ */
+function addUnique(id) {
+    return r.table("unique").insert({id}).run().then(res => {
+        if (res.errors) {
+            throw new Error("NotUnique");
+        }
+    });
+}
+
 module.exports = {
     init,
     checkDB,
@@ -161,5 +173,6 @@ module.exports = {
     createEdge,
     deleteEdge,
 
-    saveEvent
+    saveEvent,
+    addUnique
 };

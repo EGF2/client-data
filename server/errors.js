@@ -124,6 +124,17 @@ function IncorrectCountParameter(max) {
 }
 util.inherits(IncorrectCountParameter, restify.RestError);
 
+function UniqueConstraintViolated(field) {
+    restify.RestError.call(this, {
+        restCode: "UniqueConstraintViolated",
+        statusCode: 409,
+        message: `Unique constraint violated for '${field}'`,
+        constructorOpt: UniqueConstraintViolated
+    });
+    this.name = "UniqueConstraintViolated";
+}
+util.inherits(UniqueConstraintViolated, restify.RestError);
+
 module.exports = {
     ObjectNotExists,
     IncorrectObjectID,
@@ -135,5 +146,6 @@ module.exports = {
     DestinationObjectNotExists,
     EdgeAlreadyExists,
     ObjectIsNotValid,
-    IncorrectCountParameter
+    IncorrectCountParameter,
+    UniqueConstraintViolated
 };

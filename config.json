@@ -201,7 +201,8 @@
         "email": {
           "type": "string",
           "validator": "email",
-          "required": true
+          "required": true,
+          "unique": true
         },
         "system": {
           "type": "object_id",

@@ -50,6 +50,8 @@ function createObject(req, res, next) {
         object.created_at = now;
         object.modified_at = now;
         validate(object);
+        yield checkUnique(object);
+
         yield storage.createObject(object);
 
         if (!objConfig.suppress_event) {
@@ -153,6 +155,25 @@ function createObjectEvent(method, current, previous) {
     }
 
     return event;
+}
+
+/**
+ * Check unique field's values
+ */
+function checkUnique(object) {
+    let cfg = commons.getObjectConfig(object.object_type);
+    return Promise.all(Object.keys(object).map(field => {
+        if (cfg.fields[field].unique) {
+            return storage.addUnique(`${object.object_type}-${field}-${object[field]}`)
+                .catch(err => {
+                    if (err.message === "NotUnique") {
+                        throw new errors.UniqueConstraintViolated(field);
+                    }
+                    throw err;
+                });
+        }
+        return Promise.resolve();
+    }));
 }
 
 module.exports = {

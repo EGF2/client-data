@@ -27,7 +27,8 @@ function init() {
             .then(() => execute("CREATE INDEX ON edges (dst)")),
         execute("CREATE TYPE EDGE (src TEXT, name TEXT, dst TEXT)").then(() =>
             execute("CREATE TABLE events (id TEXT, object_type TEXT, method TEXT, object TEXT, edge EDGE, current MAP<TEXT, TEXT>, previous MAP<TEXT, TEXT>, created_at BIGINT, PRIMARY KEY (id))")
-        )
+        ),
+        execute("CREATE TABLE unique (id TEXT, PRIMARY KEY (id))")
     ]));
 }
 
@@ -201,6 +202,14 @@ function saveEvent(event) {
     return execute("INSERT INTO events JSON ?", [JSON.stringify(event)]);
 }
 
+function addUnique(id) {
+    return execute("INSERT INTO unique (id) VALUES (?) IF NOT EXISTS", [id]).then(res => {
+        if (!res.rows[0]["[applied]"]) {
+            throw new Error("NotUnique");
+        }
+    });
+}
+
 module.exports = {
     init,
     checkDB,
@@ -217,5 +226,6 @@ module.exports = {
     createEdge,
     deleteEdge,
 
-    saveEvent
+    saveEvent,
+    addUnique
 };
