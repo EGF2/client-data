@@ -5,6 +5,7 @@
 const co = require("co");
 const commons = require("./commons");
 const storage = require("../storage");
+const queue = require("../queue");
 const errors = require("./errors");
 const microtime = require("microtime");
 const validate = require("./validate");
@@ -57,6 +58,9 @@ function createObject(req, res, next) {
         if (!objConfig.suppress_event) {
             let event = createObjectEvent("POST", object, undefined, now);
             yield storage.saveEvent(event);
+            if (queue) {
+                yield queue.sendEvent(event);
+            }
         }
 
         return object;
@@ -98,6 +102,9 @@ function updateObject(req, res, next) {
         if (!objConfig.suppress_event) {
             let event = createObjectEvent("PUT", current, previous, delta.modified_at);
             yield storage.saveEvent(event);
+            if (queue) {
+                yield queue.sendEvent(event);
+            }
         }
 
         return current;
@@ -124,6 +131,9 @@ function deleteObject(req, res, next) {
         if (!objConfig.suppress_event) {
             let event = createObjectEvent("DELETE", undefined, previous, now);
             yield storage.saveEvent(event);
+            if (queue) {
+                yield queue.sendEvent(event);
+            }
         }
 
         return {

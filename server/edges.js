@@ -5,6 +5,7 @@
 
 const co = require("co");
 const storage = require("../storage");
+const queue = require("../queue");
 const commons = require("./commons");
 const errors = require("./errors");
 const microtime = require("microtime");
@@ -127,6 +128,9 @@ function createEdge(req, res, next) {
 
         let event = createEdgeEvent("POST", p.src, p.edge_name, p.dst);
         yield storage.saveEvent(event);
+        if (queue) {
+            yield queue.sendEvent(event);
+        }
 
         return {
             created_at: now
@@ -155,6 +159,9 @@ function deleteEdge(req, res, next) {
 
         let event = createEdgeEvent("DELETE", p.src, p.edge_name, p.dst);
         yield storage.saveEvent(event);
+        if (queue) {
+            yield queue.sendEvent(event);
+        }
 
         return {
             deleted_at: new Date()

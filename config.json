@@ -12,6 +12,14 @@
     ],
     "keyspace": "eigengraph"
   },
+  "queue": "",
+  "kafka": {
+    "hosts": [
+      "localhost:2181"
+    ],
+    "client_id": "client-data",
+    "topic": "events"
+  },
   "graph": {
     "custom_schemas": {
       "key_value": {

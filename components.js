@@ -51,8 +51,10 @@ function init() {
         });
 
         const storage = require("./storage");
+        const queue = require("./queue");
         return Promise.resolve()
             .then(() => argv.i ? storage.init() : true)
+            .then(() => argv.i && queue ? queue.init() : true)
             .then(() => {
                 if (argv.i && ("secret_organization" in config.graph)) {
                     const now = new Date();
