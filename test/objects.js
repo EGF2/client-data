@@ -17,6 +17,7 @@ describe("Objects API", () => {
     let object; // for future use
     describe("Create object", () => {
         it("should create object", done => {
+            let rand = Math.floor(Math.random() * (100 - 1)) + 1;
             request(server)
                 .post("/v1/graph")
                 .set("Content-Type", "application/json")
@@ -26,7 +27,8 @@ describe("Objects API", () => {
                         given: "Mock",
                         family: "Mock"
                     },
-                    email: "test@example.com",
+                    email: `test${rand}@example.com`,
+                    date_of_birth: new Date(),
                     system: "00000000-0000-1000-8000-000000000000-01"
                 })
                 .expect(200)
