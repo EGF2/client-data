@@ -79,7 +79,7 @@ function getEdge(srcID, edgeName, dstID) {
  * Get edges from DB
  */
 function getEdges(srcID, edgeName, count, after) {
-    let skip = Number(after) || 0;
+    let skip = (Number(after) + 1) || 0;
     if (skip < 0) {
         skip = 0;
     }
@@ -110,7 +110,7 @@ function getEdgeCount(srcID, edgeName) {
  */
 function getFirstAndLastParams(objects, after) {
     if (objects.length) {
-        let first = (Number(after) || 0) + 1;
+        let first = (Number(after) + 1) || 0;
         let last = first + (objects.length - 1);
         first = String(first);
         last = String(last);
