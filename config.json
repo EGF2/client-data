@@ -17,7 +17,7 @@
     "hosts": [
       "localhost:9092"
     ],
-    "client_id": "client-data",
+    "client-id": "client-data",
     "topic": "events"
   },
   "graph": {
