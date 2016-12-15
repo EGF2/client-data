@@ -15,7 +15,7 @@
   "queue": "rethinkdb",
   "kafka": {
     "hosts": [
-      "localhost:2181"
+      "localhost:9092"
     ],
     "client_id": "client-data",
     "topic": "events"

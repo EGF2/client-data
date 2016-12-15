@@ -1,30 +1,24 @@
 "use strict";
 
 const config = require("../components").config;
-const kafka = require("kafka-node");
-const client = new kafka.Client(
-    config.kafka.hosts.join(","),
-    config.kafka.client_id
-);
-const producer = new kafka.HighLevelProducer(client);
-
-function init() {
-    return new Promise((resolve, reject) => {
-        producer.createTopics([config.kafka.topic],
-            (err, data) => err ? reject(err): resolve(data));
-    });
-}
+const kafka = require("no-kafka");
+var producer = new kafka.Producer({
+    connectionString: config.kafka.hosts.join(","),
+    clientId: config.kafka.client_id
+});
+const producerPromise = producer.init();
 
 function sendEvent(event) {
-    return new Promise((resolve, reject) => {
-        producer.send([{
+    return producerPromise.then(() => {
+        return producer.send({
             topic: config.kafka.topic,
-            messages: JSON.stringify(event)
-        }], (err, data) => err ? reject(err): resolve(data));
+            message: {
+                value: JSON.stringify(event)
+            }
+        });
     });
 }
 
 module.exports = {
-    init,
     sendEvent
 };
