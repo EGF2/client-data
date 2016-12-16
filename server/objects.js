@@ -9,6 +9,7 @@ const queue = require("../queue");
 const errors = require("./errors");
 const microtime = require("microtime");
 const validate = require("./validate");
+const _ = require("underscore");
 
 /**
  * Get object by ID
@@ -76,7 +77,6 @@ function updateObject(req, res, next) {
     return co(function *() {
         let id = req.params.id;
         let delta = req.body;
-        delta.modified_at = new Date();
 
         let objectType = commons.getObjectType(id);
         let objConfig = commons.getObjectConfig(objectType);
@@ -92,9 +92,14 @@ function updateObject(req, res, next) {
         // prepare current object
         let current = Object.assign({}, previous);
         current = Object.assign(current, delta);
-        validate(current);
 
-        // TODO update only if there are changes
+        // update only if there are changes
+        if (_.isEqual(current, previous)) {
+            return current;
+        }
+
+        current.modified_at = new Date();
+        validate(current);
 
         yield storage.updateObject(id, delta, deleteFields);
         // let current = yield storage.getObject(id);
