@@ -84,6 +84,9 @@ function updateObject(req, res, next) {
         if (!previous) {
             throw new errors.ObjectNotExists(id);
         }
+        if (previous.deleted_at) {
+            throw new errors.ObjectDeleted();
+        }
 
         // check delete_fields
         let deleteFields = delta.delete_fields;
@@ -135,7 +138,14 @@ function deleteObject(req, res, next) {
         if (!previous) {
             throw new errors.ObjectNotExists(id);
         }
-        yield storage.deleteObject(id);
+        if (previous.deleted_at) {
+            throw new errors.ObjectDeleted();
+        }
+        if (objConfig.volatile) {
+            yield storage.deleteObject(id);
+        } else {
+            yield storage.updateObject(id, {deleted_at: now}, []);
+        }
 
         if (!objConfig.suppress_event) {
             let event = createObjectEvent("DELETE", undefined, previous, now);

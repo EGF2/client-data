@@ -135,6 +135,17 @@ function UniqueConstraintViolated(field) {
 }
 util.inherits(UniqueConstraintViolated, restify.RestError);
 
+function ObjectDeleted() {
+    restify.RestError.call(this, {
+        restCode: "ObjectDeleted",
+        statusCode: 409,
+        message: "Couldn't change deleted object",
+        constructorOpt: ObjectDeleted
+    });
+    this.name = "ObjectDeleted";
+}
+util.inherits(ObjectDeleted, restify.RestError);
+
 module.exports = {
     ObjectNotExists,
     IncorrectObjectID,
@@ -147,5 +158,6 @@ module.exports = {
     EdgeAlreadyExists,
     ObjectIsNotValid,
     IncorrectCountParameter,
-    UniqueConstraintViolated
+    UniqueConstraintViolated,
+    ObjectDeleted
 };
