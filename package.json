@@ -24,7 +24,7 @@
   "scripts": {
     "start": "node index.js -c config.json",
     "lint": "eslint .",
-    "test": "node index.js -c test/test_config.json -i ; mocha test/*.js -c test/test_config.json"
+    "test": "node index.js -c test/test_config.json -i &>/dev/null ; mocha test/*.js -c test/test_config.json"
   },
   "license": "MIT"
 }

@@ -68,11 +68,7 @@ describe("Objects API", () => {
                     if (err) {
                         return done(err);
                     }
-                    assert.equal(res.body.object_type, "test_object");
-                    assert.equal(res.body.id, object.id);
-                    assert.equal(res.body.created_at, object.created_at);
-                    assert.equal(res.body.modified_at, object.modified_at);
-                    assert.equal(res.body.str_field, "test value");
+                    assert.deepEqual(res.body, object);
                     done();
                 });
         });

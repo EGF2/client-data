@@ -1,7 +1,7 @@
 "use strict";
 
 /* eslint camelcase: 0 */
-/* eslint max-nested-callbacks: 0 */
+/* eslint max-nested-callbacks: ["error", 6] */
 
 const assert = require("assert");
 const request = require("supertest");
@@ -13,23 +13,30 @@ function createTestObjects(values) {
     for (let i = 0; i < arguments.length; i++) {
         values.push(arguments[i]);
     }
-    return Promise.all(values.map(val =>
-        new Promise((resolve, reject) => {
-            request(server)
-                .post("/v1/graph")
-                .set("Content-Type", "application/json")
-                .send({
-                    object_type: "test_object",
-                    str_field: val
-                })
-                .end((err, res) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    resolve(res.body);
-                });
-        })
-    ));
+
+    let promise = Promise.resolve();
+    let objects = [];
+    values.forEach(val => {
+        promise = promise.then(() =>
+            new Promise((resolve, reject) => {
+                request(server)
+                    .post("/v1/graph")
+                    .set("Content-Type", "application/json")
+                    .send({
+                        object_type: "test_object",
+                        str_field: val
+                    })
+                    .end((err, res) => {
+                        if (err) {
+                            return reject(err);
+                        }
+                        objects.push(res.body);
+                        resolve();
+                    });
+            })
+        );
+    });
+    return promise.then(() => objects);
 }
 
 function createTestEdge(srcID, dstID) {
@@ -113,11 +120,7 @@ describe("Edges API", () => {
                                     if (err) {
                                         return done(err);
                                     }
-                                    assert.equal(res.body.id, objects[1].id);
-                                    assert.equal(res.body.object_type, objects[1].object_type);
-                                    assert.equal(res.body.str_field, objects[1].str_field);
-                                    assert.equal(res.body.created_at, objects[1].created_at);
-                                    assert.equal(res.body.modified_at, objects[1].modified_at);
+                                    assert.deepEqual(res.body, objects[1]);
                                     done();
                                 });
                         });
@@ -149,6 +152,86 @@ describe("Edges API", () => {
                     code: "IncorrectObjectID",
                     message: "Incorrect object ID 'dstID'"
                 }, done);
+        });
+    });
+
+    describe("Get edges", () => {
+        let src;
+        let dsts;
+        before(done => {
+            createTestObjects("src", "dst1", "dst2", "dst3", "dst4", "dst5")
+                .then(objects => {
+                    src = objects[0];
+                    dsts = objects.slice(1);
+                    let promise = Promise.resolve();
+                    objects.slice(1).reverse().forEach(dst => {
+                        promise = promise.then(() => createTestEdge(src.id, dst.id));
+                    });
+                    return promise;
+                }).then(() => done());
+        });
+
+        it("should return first page", done => {
+            request(server)
+                .get(`/v1/graph/${src.id}/test_edge`)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    assert.equal(res.body.count, 5);
+                    assert.equal(res.body.first, 0);
+                    assert.deepEqual(res.body.results, dsts);
+                    done();
+                });
+        });
+
+        it("should return objects count", done => {
+            request(server)
+                .get(`/v1/graph/${src.id}/test_edge?count=0`)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    assert.equal(res.body.count, 5);
+                    assert.deepEqual(res.body.results, []);
+                    assert.equal(res.body.first, undefined);
+                    assert.equal(res.body.last, undefined);
+                    done();
+                });
+        });
+
+        it("should return 2 objects after zero index", done => {
+            request(server)
+                .get(`/v1/graph/${src.id}/test_edge?after=0&count=2`)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    assert.equal(res.body.count, 5);
+                    assert.equal(res.body.first, 1);
+                    assert.equal(res.body.last, 2);
+                    assert.deepEqual(res.body.results, dsts.slice(1, 3));
+                    done();
+                });
+        });
+
+        it("should return empty results for extra page", done => {
+            request(server)
+                .get(`/v1/graph/${src.id}/test_edge?after=20`)
+                .expect(200)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    assert.equal(res.body.count, 5);
+                    assert.equal(res.body.first, undefined);
+                    assert.equal(res.body.last, undefined);
+                    assert.deepEqual(res.body.results, []);
+                    done();
+                });
         });
     });
 
