@@ -1,0 +1,103 @@
+{
+  "port": 8000,
+  "log_level": "info",
+  "storage": "rethinkdb",
+  "rethinkdb": {
+    "host": "localhost",
+    "db": "test"
+  },
+  "queue": "rethinkdb",
+  "graph": {
+    "custom_schemas": {
+      "edge": {
+        "src": {
+          "type": "string",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "dst": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "common_fields": {
+      "id": {
+        "type": "string",
+        "required": true
+      },
+      "object_type": {
+        "type": "string",
+        "required": true,
+        "edit_mode": "NE"
+      },
+      "created_at": {
+        "type": "date",
+        "required": true
+      },
+      "modified_at": {
+        "type": "date",
+        "required": true
+      },
+      "deleted_at": {
+        "type": "date"
+      }
+    },
+    "test_object": {
+      "code": "01",
+      "back_end_only": true,
+      "fields": {
+        "str_field": {
+          "type": "string"
+        }
+      },
+      "edges": {
+        "test_edge": {
+          "contains": ["test_object"]
+        }
+      }
+    },
+    "event": {
+      "code": "04",
+      "back_end_only": true,
+      "fields": {
+        "object": {
+          "type": "string"
+        },
+        "edge": {
+          "type": "struct",
+          "schema": "edge"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "DELETE"
+          ],
+          "required": true
+        },
+        "current": {
+          "type": "struct",
+          "schema": "any"
+        },
+        "previous": {
+          "type": "struct",
+          "schema": "any"
+        },
+        "created_at": {
+          "type": "integer",
+          "required": true
+        }
+      }
+    },
+    "pagination": {
+      "default_count": 25,
+      "max_count": 50,
+      "pagination_mode": "index"
+    }
+  }
+}

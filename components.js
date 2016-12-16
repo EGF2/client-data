@@ -67,7 +67,12 @@ function init() {
                 }
             })
             .then(() => storage.checkDB())
-            .then(() => module.exports);
+            .then(() => {
+                if (argv.i) {
+                    process.exit(0);
+                }
+                return module.exports;
+            });
     }).catch(err => {
         console.error(err);
         process.exit(1);

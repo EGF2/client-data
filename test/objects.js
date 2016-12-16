@@ -17,29 +17,20 @@ describe("Objects API", () => {
     let object; // for future use
     describe("Create object", () => {
         it("should create object", done => {
-            let rand = Math.floor(Math.random() * (100 - 1)) + 1;
             request(server)
                 .post("/v1/graph")
                 .set("Content-Type", "application/json")
                 .send({
-                    object_type: "user",
-                    name: {
-                        given: "Mock",
-                        family: "Mock"
-                    },
-                    email: `test${rand}@example.com`,
-                    date_of_birth: new Date(),
-                    system: "00000000-0000-1000-8000-000000000000-01"
+                    object_type: "test_object",
+                    str_field: "test value"
                 })
                 .expect(200)
                 .end((err, res) => {
                     if (err) {
                         return done(err);
                     }
-                    assert.equal(res.body.object_type, "user");
-                    assert.ok(res.body.id);
-                    assert.ok(res.body.created_at);
-                    assert.ok(res.body.modified_at);
+                    assert.equal(res.body.object_type, "test_object");
+                    assert.equal(res.body.str_field, "test value");
                     object = res.body;
                     done();
                 });
@@ -77,20 +68,21 @@ describe("Objects API", () => {
                     if (err) {
                         return done(err);
                     }
-                    assert.equal(res.body.object_type, "user");
+                    assert.equal(res.body.object_type, "test_object");
                     assert.equal(res.body.id, object.id);
                     assert.equal(res.body.created_at, object.created_at);
                     assert.equal(res.body.modified_at, object.modified_at);
+                    assert.equal(res.body.str_field, "test value");
                     done();
                 });
         });
 
         it("should throw object doesn't exsit error", done => {
             request(server)
-                .get("/v1/graph/incorrect-03")
+                .get("/v1/graph/incorrect-01")
                 .expect(404, {
                     code: "ObjectNotExists",
-                    message: "Object 'incorrect-03' doesn't exist"
+                    message: "Object 'incorrect-01' doesn't exist"
                 }, done);
         });
 
@@ -108,17 +100,17 @@ describe("Objects API", () => {
         it("should update object", done => {
             request(server)
                 .put(`/v1/graph/${object.id}`)
-                .send({email: "new@example.com"})
+                .send({str_field: "new test value"})
                 .expect(200)
                 .end((err, res) => {
                     if (err) {
                         return done(err);
                     }
-                    assert.equal(res.body.object_type, "user");
+                    assert.equal(res.body.object_type, "test_object");
                     assert.equal(res.body.id, object.id);
                     assert.equal(res.body.created_at, object.created_at);
                     assert.ok(res.body.modified_at);
-                    assert.equal(res.body.email, "new@example.com");
+                    assert.equal(res.body.str_field, "new test value");
                     object = res.body;
                     done();
                 });
@@ -127,17 +119,17 @@ describe("Objects API", () => {
         it("should delete fields", done => {
             request(server)
                 .put(`/v1/graph/${object.id}`)
-                .send({delete_fields: ["foo"]})
+                .send({delete_fields: ["str_field"]})
                 .expect(200)
                 .end((err, res) => {
                     if (err) {
                         return done(err);
                     }
-                    assert.equal(res.body.object_type, "user");
+                    assert.equal(res.body.object_type, "test_object");
                     assert.equal(res.body.id, object.id);
                     assert.equal(res.body.created_at, object.created_at);
                     assert.ok(res.body.modified_at);
-                    assert.equal(res.body.foo, undefined);
+                    assert.equal(res.body.str_field, undefined);
                     object = res.body;
                     done();
                 });
@@ -145,11 +137,11 @@ describe("Objects API", () => {
 
         it("should throw object doesn't exsit error", done => {
             request(server)
-                .put("/v1/graph/incorrect-03")
+                .put("/v1/graph/incorrect-01")
                 .send({})
                 .expect(404, {
                     code: "ObjectNotExists",
-                    message: "Object 'incorrect-03' doesn't exist"
+                    message: "Object 'incorrect-01' doesn't exist"
                 }, done);
         });
 
@@ -173,11 +165,11 @@ describe("Objects API", () => {
 
         it("should throw object doesn't exsit error", done => {
             request(server)
-                .delete("/v1/graph/incorrect-03")
+                .delete("/v1/graph/incorrect-01")
                 .send({})
                 .expect(404, {
                     code: "ObjectNotExists",
-                    message: "Object 'incorrect-03' doesn't exist"
+                    message: "Object 'incorrect-01' doesn't exist"
                 }, done);
         });
 

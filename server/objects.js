@@ -92,6 +92,11 @@ function updateObject(req, res, next) {
         // prepare current object
         let current = Object.assign({}, previous);
         current = Object.assign(current, delta);
+        if (deleteFields) {
+            deleteFields.forEach(field => {
+                delete current[field];
+            });
+        }
 
         // update only if there are changes
         if (_.isEqual(current, previous)) {
@@ -102,7 +107,6 @@ function updateObject(req, res, next) {
         validate(current);
 
         yield storage.updateObject(id, delta, deleteFields);
-        // let current = yield storage.getObject(id);
 
         if (!objConfig.suppress_event) {
             let event = createObjectEvent("PUT", current, previous, delta.modified_at);
