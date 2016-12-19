@@ -274,6 +274,7 @@
     "job": {
       "code": "05",
       "back_end_only": true,
+      "volatile": true,
       "fields": {
         "user": {
           "type": "object_id",
@@ -307,6 +308,7 @@
     },
     "file": {
       "code": "06",
+      "volatile": true,
       "GET": "any",
       "PUT": "self",
       "fields": {
@@ -363,6 +365,7 @@
     "schedule": {
       "code": "07",
       "back_end_only": true,
+      "volatile": true,
       "fields": {
         "listener": {
           "type": "string",
@@ -399,6 +402,7 @@
     "schedule_event": {
       "code": "08",
       "back_end_only": true,
+      "volatile": true,
       "fields": {
         "schedule": {
           "type": "object_id",

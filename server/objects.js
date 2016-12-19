@@ -52,7 +52,7 @@ function createObject(req, res, next) {
         object.created_at = now;
         object.modified_at = now;
         validate(object);
-        yield checkUnique(object);
+        yield applyUniqueConstraint(object);
 
         yield storage.createObject(object);
 
@@ -108,6 +108,7 @@ function updateObject(req, res, next) {
 
         current.modified_at = new Date();
         validate(current);
+        yield applyUniqueConstraint(current, previous);
 
         yield storage.updateObject(id, delta, deleteFields);
 
@@ -141,6 +142,9 @@ function deleteObject(req, res, next) {
         if (previous.deleted_at) {
             throw new errors.ObjectDeleted();
         }
+
+        yield applyUniqueConstraint(null, previous);
+
         if (objConfig.volatile) {
             yield storage.deleteObject(id);
         } else {
@@ -187,22 +191,47 @@ function createObjectEvent(method, current, previous) {
 }
 
 /**
- * Check unique field's values
+ * Return unique values from object
  */
-function checkUnique(object) {
-    let cfg = commons.getObjectConfig(object.object_type);
-    return Promise.all(Object.keys(object).map(field => {
-        if (cfg.fields[field].unique) {
-            return storage.addUnique(`${object.object_type}-${field}-${object[field]}`)
-                .catch(err => {
-                    if (err.message === "NotUnique") {
-                        throw new errors.UniqueConstraintViolated(field);
-                    }
-                    throw err;
-                });
+function getUniqueValues(object) {
+    if (object) {
+        let values = [];
+        let cfg = commons.getObjectConfig(object.object_type);
+        Object.keys(object).map(field => {
+            if (cfg.fields[field].unique) {
+                values.push(`${object.object_type}-${field}-${object[field]}`);
+            }
+        });
+        return values;
+    }
+    return [];
+}
+
+/**
+ * Apply unique constraints
+ */
+function applyUniqueConstraint(current, previous) {
+    let cur = getUniqueValues(current);
+    let prev = getUniqueValues(previous);
+
+    let add = _.difference(cur, prev);
+    let del = _.difference(prev, cur);
+
+    return Promise.all(add.map(value =>
+        storage.addUnique(value).then(() => true).catch(() => false)
+    ))
+    .then(added => {
+        let incorrect = added.indexOf(false);
+        if (incorrect > -1) {
+            // remove all added unique values
+            return Promise.all(added.map((v, i) =>
+                v ? storage.removeUnique(add[i]) : undefined
+            )).then(() => {
+                throw new errors.UniqueConstraintViolated(add[incorrect]);
+            });
         }
-        return Promise.resolve();
-    }));
+    })
+    .then(() => Promise.all(del.map(value => storage.removeUnique(value))));
 }
 
 module.exports = {

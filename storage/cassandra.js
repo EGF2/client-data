@@ -210,6 +210,13 @@ function addUnique(id) {
     });
 }
 
+/**
+ * Remove unique record
+ */
+function removeUnique(id) {
+    return execute("DELETE FROM unique WHERE id = ?", [id]);
+}
+
 module.exports = {
     init,
     checkDB,
@@ -227,5 +234,6 @@ module.exports = {
     deleteEdge,
 
     saveEvent,
-    addUnique
+    addUnique,
+    removeUnique
 };

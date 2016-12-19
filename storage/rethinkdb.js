@@ -157,6 +157,13 @@ function addUnique(id) {
     });
 }
 
+/**
+ * Remove unique record
+ */
+function removeUnique(id) {
+    return r.table("unique").get(id).delete().run();
+}
+
 module.exports = {
     init,
     checkDB,
@@ -174,5 +181,6 @@ module.exports = {
     deleteEdge,
 
     saveEvent,
-    addUnique
+    addUnique,
+    removeUnique
 };
