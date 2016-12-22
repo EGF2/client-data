@@ -158,7 +158,7 @@
       }
     },
     "system_user": {
-      "code": "01",
+      "code": "Z1",
       "suppress_event": true,
       "back_end_only": true,
       "fields": {
@@ -177,7 +177,7 @@
       }
     },
     "session": {
-      "code": "02",
+      "code": "Z2",
       "suppress_event": true,
       "back_end_only": true,
       "fields": {
@@ -196,7 +196,7 @@
       }
     },
     "user": {
-      "code": "03",
+      "code": "Z3",
       "GET": "self",
       "PUT": "self",
       "fields": {
@@ -237,7 +237,7 @@
       }
     },
     "event": {
-      "code": "04",
+      "code": "Z4",
       "back_end_only": true,
       "fields": {
         "object": {
@@ -271,7 +271,7 @@
       }
     },
     "job": {
-      "code": "05",
+      "code": "Z5",
       "back_end_only": true,
       "volatile": true,
       "fields": {
@@ -306,7 +306,7 @@
       }
     },
     "file": {
-      "code": "06",
+      "code": "Z6",
       "volatile": true,
       "GET": "any",
       "PUT": "self",
@@ -362,7 +362,7 @@
       }
     },
     "schedule": {
-      "code": "07",
+      "code": "Z7",
       "back_end_only": true,
       "volatile": true,
       "fields": {
@@ -399,7 +399,7 @@
       }
     },
     "schedule_event": {
-      "code": "08",
+      "code": "Z8",
       "back_end_only": true,
       "volatile": true,
       "fields": {
@@ -419,7 +419,7 @@
       }
     },
     "secret_organization": {
-      "code": "09",
+      "code": "Z9",
       "suppress_event": true,
       "back_end_only": true,
       "fields": {
