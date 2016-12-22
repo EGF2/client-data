@@ -214,8 +214,7 @@
         },
         "system": {
           "type": "object_id",
-          "object_types": ["system_user"],
-          "required": true
+          "object_types": ["system_user"]
         },
         "verified": {
           "type": "boolean",
