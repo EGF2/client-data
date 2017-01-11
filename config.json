@@ -243,6 +243,10 @@
         "object": {
           "type": "string"
         },
+        "user": {
+          "type": "object_id",
+          "object_types": ["user"]
+        },
         "edge": {
           "type": "struct",
           "schema": "edge"

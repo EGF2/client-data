@@ -57,7 +57,8 @@ function createObject(req, res, next) {
         yield storage.createObject(object);
 
         if (!objConfig.suppress_event) {
-            let event = createObjectEvent("POST", object, undefined, now);
+            let author = req.headers.author;
+            let event = createObjectEvent("POST", object, undefined, author);
             yield storage.saveEvent(event);
             if (queue) {
                 yield queue.sendEvent(event);
@@ -113,7 +114,8 @@ function updateObject(req, res, next) {
         yield storage.updateObject(id, delta, deleteFields);
 
         if (!objConfig.suppress_event) {
-            let event = createObjectEvent("PUT", current, previous, delta.modified_at);
+            let author = req.headers.author;
+            let event = createObjectEvent("PUT", current, previous, author);
             yield storage.saveEvent(event);
             if (queue) {
                 yield queue.sendEvent(event);
@@ -152,7 +154,8 @@ function deleteObject(req, res, next) {
         }
 
         if (!objConfig.suppress_event) {
-            let event = createObjectEvent("DELETE", undefined, previous, now);
+            let author = req.headers.author;
+            let event = createObjectEvent("DELETE", undefined, previous, author);
             yield storage.saveEvent(event);
             if (queue) {
                 yield queue.sendEvent(event);
@@ -170,7 +173,7 @@ function deleteObject(req, res, next) {
 /**
  * Create object event
  */
-function createObjectEvent(method, current, previous) {
+function createObjectEvent(method, current, previous, author) {
     let data = current || previous;
     let event = {
         id: commons.generateID("event"),
@@ -185,6 +188,9 @@ function createObjectEvent(method, current, previous) {
     }
     if (previous) {
         event.previous = previous;
+    }
+    if (author) {
+        event.user = author;
     }
 
     return event;

@@ -126,7 +126,8 @@ function createEdge(req, res, next) {
 
         yield storage.createEdge(p.src, p.edge_name, p.dst, now.toISOString());
 
-        let event = createEdgeEvent("POST", p.src, p.edge_name, p.dst);
+        let author = req.headers.author;
+        let event = createEdgeEvent("POST", p.src, p.edge_name, p.dst, author);
         yield storage.saveEvent(event);
         if (queue) {
             yield queue.sendEvent(event);
@@ -157,7 +158,8 @@ function deleteEdge(req, res, next) {
 
         yield storage.deleteEdge(p.src, p.edge_name, p.dst);
 
-        let event = createEdgeEvent("DELETE", p.src, p.edge_name, p.dst);
+        let author = req.headers.author;
+        let event = createEdgeEvent("DELETE", p.src, p.edge_name, p.dst, author);
         yield storage.saveEvent(event);
         if (queue) {
             yield queue.sendEvent(event);
@@ -174,8 +176,8 @@ function deleteEdge(req, res, next) {
 /**
  * Create edge event
  */
-function createEdgeEvent(method, srcId, edgeName, dstId) {
-    return {
+function createEdgeEvent(method, srcId, edgeName, dstId, author) {
+    let event = {
         id: commons.generateID("event"),
         object_type: "event",
         method,
@@ -186,6 +188,12 @@ function createEdgeEvent(method, srcId, edgeName, dstId) {
         },
         created_at: microtime.now()
     };
+
+    if (author) {
+        event.user = author;
+    }
+
+    return event;
 }
 
 module.exports = {
