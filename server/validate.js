@@ -81,7 +81,7 @@ const check = {
         }
     },
     date: (val, type, subtype, field) => {
-        let valid = _.isString(val) && Date.parse(val);
+        let valid = _.isString(val) && !isNaN(Date.parse(val));
         valid = valid || _.isDate(val);
         if (!valid) {
             throw new errors.ObjectIsNotValid(`'${field}' must be ${type}`);
