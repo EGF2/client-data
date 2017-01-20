@@ -111,6 +111,7 @@ function updateObject(req, res, next) {
         validate(current);
         yield applyUniqueConstraint(current, previous);
 
+        delta.modified_at = current.modified_at;
         yield storage.updateObject(id, delta, deleteFields);
 
         if (!objConfig.suppress_event) {
