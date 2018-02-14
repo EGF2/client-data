@@ -7,6 +7,7 @@ const fs = require("fs");
 const yargs = require("yargs");
 const bunyan = require("bunyan");
 const uuid = require("node-uuid");
+require('dotenv').config();
 
 const argv = yargs
     .usage("Usage: $0 [options]")
@@ -44,12 +45,26 @@ const argv = yargs
 
 function init() {
     return argv.config.then(config => {
-        module.exports.config = config;
-        module.exports.logger = bunyan.createLogger({
+        for (let key in config) {
+            if (process.env[key]) {
+                try {
+                    config[key] = JSON.parse(process.env[key]);
+                } catch (e) {
+                    config[key] = process.env[key];
+                }
+            }
+        }
+
+        const log = bunyan.createLogger({
             name: "client-data",
-            level: config.log_level
+            level: config.log_level,
         });
 
+
+        log.info({config});
+
+        module.exports.config = config;
+        module.exports.logger = log;
         const storage = require("./storage");
         return Promise.resolve()
             .then(() => argv.i ? storage.init() : true)
