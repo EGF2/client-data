@@ -46,11 +46,12 @@ const argv = yargs
 function init() {
     return argv.config.then(config => {
         for (let key in config) {
-            if (process.env[key]) {
+            if (process.env[`egf_${key}`]) {
                 try {
-                    config[key] = JSON.parse(process.env[key]);
+                    config[key] = JSON.parse(process.env[`egf_${key}`]);
+            
                 } catch (e) {
-                    config[key] = process.env[key];
+                    config[key] = process.env[`egf_${key}`];
                 }
             }
         }
