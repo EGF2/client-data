@@ -7,7 +7,6 @@ const fs = require("fs");
 const yargs = require("yargs");
 const bunyan = require("bunyan");
 const uuid = require("node-uuid");
-require('dotenv').config();
 
 const argv = yargs
     .usage("Usage: $0 [options]")
