@@ -15,6 +15,8 @@ function createServer() {
         mapParams: false
     }));
 
+    // common
+    server.get("/healthcheck", commons.getHealthcheck);
     server.get("/v1/graph", commons.getGraphConfig);
 
     // objects API

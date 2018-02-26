@@ -56,9 +56,14 @@ function getGraphConfig(req, res) {
     res.send(200, graph);
 }
 
+function getHealthcheck(req, res) {
+    res.send(200);
+}
+
 module.exports = {
     getObjectType,
     getObjectConfig,
     generateID,
-    getGraphConfig
+    getGraphConfig,
+    getHealthcheck
 };
